@@ -1,12 +1,6 @@
-# Tridos
-This is the respository of  Tridos.
+# DRTENet: Dual-Focus Residual Tensor Enhancement Network for Infrared Small Target Detection
 
-Triple-domain Feature Learning with Frequency-aware Memory Enhancement for Moving Infrared Small Target Detection
-
-Our paper is accepted to "IEEE Trans. on Geoscience and Remote Sensing (TGRS) 2024".
-
-All codes are realsed!
-![frame](frame.png)
+![frame](fig2.png)
 ## Abstract
 Moving infrared small target detection presents significant challenges due to tiny target sizes and low contrast against backgrounds. Currently-existing methods primarily focus on extracting target features only from the spatial-temporal domain. For further enhancing feature representation, more information domains such as frequency are believed to be potentially valuable.  To extend target feature learning, we propose a new Triple-domain Strategy (Tridos) with the frequency-aware memory enhancement on the spatial-temporal domain. In our scheme, it effectively detaches and enhances frequency features by a local-global frequency-aware module with Fourier transform. Inspired by the human visual system, our memory enhancement aims to capture the target spatial relations between video frames. Furthermore, it encodes temporal dynamics motion features via differential learning and residual enhancing.
 Additionally, we further design a residual compensation unit to reconcile possible cross-domain feature mismatches.
