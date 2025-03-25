@@ -8,19 +8,15 @@ To our best knowledge, our Tridos is the first work to explore target feature le
 
 ## Prerequisite
 - python == 3.8
-- pytorch == 1.10.0
-- einops == 0.7.0
-- opencv-python == 4.7.0.72
-- scikit-learn == 1.2.2
-- scipy == 1.9.1
-- Tested on Ubuntu 20.04.6, with CUDA 12.0, and 1x NVIDIA 3090(24 GB)
+- pytorch == 1.10
+- CUDA == 11.1
+- mmcv-full == 1.7.0
+- mmdet == 2.25.0
+- mmsegmentation == 0.28.0
 
 ## Datasets
-- You can download them directly from the website: [DAUB](https://www.scidb.cn/en/detail?dataSetId=720626420933459968), [ITSDT](https://www.scidb.cn/en/detail?dataSetId=de971a1898774dc5921b68793817916e&dataSetType=journal), [IRDST](https://xzbai.buaa.edu.cn/datasets.html). You can also directly download the organized version of our paper. [ITSDT-15K](https://drive.google.com/file/d/1nnlXK0QCoFqToOL-7WdRQCZfbGJvHLh2/view?usp=sharing). 
-- The COCO format json file needs to be converted into a txt format file. 
-```
-python utils_coco/coco_to_txt.py
-```
+- You can download them directly from the website: [NUAA](https://www.scidb.cn/en/detail?dataSetId=720626420933459968), [IRSDT](https://www.scidb.cn/en/detail?dataSetId=de971a1898774dc5921b68793817916e&dataSetType=journal), [NUDT](https://xzbai.buaa.edu.cn/datasets.html).
+
 ## Usage
 ### Train
 ```
@@ -47,15 +43,6 @@ IF any questions, please contact with Weiwei Duan via email: [dwwuestc@163.com](
 ## Citation
 If you find this repo useful, please cite our paper.
 ```
-@ARTICLE{10663463,
-  author={Duan, Weiwei and Ji, Luping and Chen, Shengjia and Zhu, Sicheng and Ye, Mao},
-  journal={IEEE Transactions on Geoscience and Remote Sensing}, 
-  title={Triple-domain Feature Learning with Frequency-aware Memory Enhancement for Moving Infrared Small Target Detection}, 
-  year={2024},
-  volume={},
-  number={},
-  pages={1-1},
-  keywords={Feature extraction;Frequency-domain analysis;Object detection;Representation learning;Fourier transforms;Data mining;Visual systems;Moving Infrared Small Target Detection;Triple-domain Feature Learning;Fourier Transform;Frequency Aware;Memory Enhancement},
-  doi={10.1109/TGRS.2024.3452175}}
+
 
 ```
