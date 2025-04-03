@@ -18,12 +18,11 @@ Infrared small target detection remains a challenging task due to the inherent l
 ## Usage
 ### Train
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py
+CUDA_VISIBLE_DEVICES=0 python train.py configs/abcnet/abcnet_clft-l_512x512_1500e.py
 ```
 ### Test
-- Usually model_best.pth is not necessarily the best model. The best model may have a lower val_loss or a higher AP50 during verification.
 ```
-CUDA_VISIBLE_DEVICES=0 python vid_map_coco.py
+CUDA_VISIBLE_DEVICES=0 python test.py <CONFIG_FILE> <SEG_CHECKPOINT_FILE>
 ```
 ### Visulization
 ```
