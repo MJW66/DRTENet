@@ -1,6 +1,3 @@
-# @Time    : 2022/4/6 15:23
-# @Author  : PEIWEN PAN
-# @Email   : 121106022690@njust.edu.cn
 # @File    : train.py
 # @Software: PyCharm
 import argparse
@@ -28,7 +25,7 @@ from build.build_scheduler import build_scheduler
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a segmentor')
     #parser.add_argument('config', help='train config file path')
-    parser.add_argument('--config', default='./configs/abcnet/abcnet_clft-b_256x256_1500e_nudt.py', help='train config file path')
+    parser.add_argument('--config', default='', help='train config file path')
     parser.add_argument(
         '--load-from', help='the checkpoint file to load weights from')
     parser.add_argument(
@@ -143,11 +140,11 @@ class Train(object):
             if args.local_rank != -1:
                 img = img.cuda()
                 mask = mask.cuda()
-                edge = edge.cuda()  # ---------------------
+                edge = edge.cuda()  
             else:
                 img = img.to(self.device)
                 mask = mask.to(self.device)
-                edge = edge.to(self.device)  # ---------------------
+                edge = edge.to(self.device)  
             preds = self.model(img, edge)
             # TODO when use deep supervision, should log pred loss, not all loss sum
             if self.deep_supervision and self.cfg.model['decode_head']['deep_supervision']:
