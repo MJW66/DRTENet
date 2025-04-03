@@ -1,19 +1,15 @@
-# @Time    : 2023/3/17 15:56
-# @Author  : PEIWEN PAN
-# @Email   : 121106022690@njust.edu.cn
-# @File    : ABCNet.py
+# @File    : DRTENet.py
 # @Software: PyCharm
 import torch
 import torch.nn as nn
 
-from KTM import KTM
+from DFOM import DFOM
 from model.ABC.Module import conv_block, up_conv, _upsample_like, conv_relu_bn, dconv_block
 from einops import rearrange
 import cv2 as cv
 import numpy as np
 import torch.nn.functional as F
 from model.network import Resnet
-from swsam import SWSAM, DirectionalConvUnit
 
 
 class Attention(nn.Module):
@@ -103,9 +99,9 @@ class ConvTransformer(nn.Module):
         return out
 
 
-class ABCNet(nn.Module):
+class DRTENet(nn.Module):
     def __init__(self, in_ch=3, out_ch=1, dim=64, ori_h=256, deep_supervision=True, **kwargs):
-        super(ABCNet, self).__init__()
+        super(DRTENet, self).__init__()
         self.deep_supervision = deep_supervision
         filters = [dim, dim * 2, dim * 4, dim * 8, dim * 16]
         # features = [ori_h // 2, ori_h // 4, ori_h // 8, ori_h // 16]
@@ -139,7 +135,7 @@ class ABCNet(nn.Module):
         self.conv2 = nn.Conv2d(filters[1], out_ch, kernel_size=3, stride=1, padding=1)
         self.conv1 = nn.Conv2d(filters[0], out_ch, kernel_size=3, stride=1, padding=1)
 
-        #add by mjw
+        #add 
         self.tc1 = nn.Conv2d(3, 16, kernel_size=1, padding=0, bias=False)
         self.tc2 = nn.Conv2d(3, 32, kernel_size=1, padding=0, bias=False)
         self.tc3 = nn.Conv2d(3, 64, kernel_size=1, padding=0, bias=False)
@@ -160,17 +156,11 @@ class ABCNet(nn.Module):
         self.res2_l = Resnet.BasicBlock(256, 256, stride=1, downsample=None)
         self.res3_l = Resnet.BasicBlock(128, 128, stride=1, downsample=None)
 
-        self.KTM1 = KTM(filters[3])
-        self.KTM2 = KTM(filters[2])
-        self.KTM3 = KTM(filters[1])
+        self.DFOM1 = DFOM(filters[3])
+        self.DFOM2 = DFOM(filters[2])
+        self.DFOM3 = DFOM(filters[1])
 
-        self.SWSAM_1 = SWSAM(filters[3])
-        self.SWSAM_2 = SWSAM(filters[2])
-        self.SWSAM_3 = SWSAM(filters[1])
 
-        self.dirConv1 = DirectionalConvUnit(filters[3])
-        self.dirConv2 = DirectionalConvUnit(filters[2])
-        self.dirConv3 = DirectionalConvUnit(filters[1])
         # --------------------------------------------------------------------------------------------------------------
 
     def forward(self, x, x_grad):
@@ -178,11 +168,10 @@ class ABCNet(nn.Module):
         # e2 = self.maxpools[0](e1)
         e2 = self.Convtans2(e1)
 
-        # --------------- add by mjw---------------
+        # ------------------------------
         x_grad1 = x_grad.clone()
         x_grad2 = x_grad.clone()
 
-        # x_grad2：高斯金字塔第一层
         x_grad2 = self.tc1_b(x_grad2)
         f1 = (e2 + x_grad2) * x_grad2
         f1 = self.res3_b(f1) + f1
@@ -193,7 +182,7 @@ class ABCNet(nn.Module):
         e3 = self.maxpools[1](e2)
         e3 = self.Convtans3(e3)
 
-        # --------------- add by mjw---------------
+        # ------------------------------
         _, _, hei2, wid2 = e3.shape
         _, _, h, w = x_grad1.shape
         # 将张量转换为Numpy数组
@@ -201,14 +190,13 @@ class ABCNet(nn.Module):
         x_grad1 = x_grad1 * 255
         x_grad1 = x_grad1.numpy()
 
-        # 第二层高斯金字塔，循环处理每个样本
+
         length0 = x_grad1.shape[0]
         dst = []
         for i0 in range(length0):
             x_gra = x_grad1[i0, :, :, :]
             x_gra = x_gra.transpose((1, 2, 0))
             dst1 = cv.pyrDown(x_gra)
-            # cv.imwrite('/home/b311/yzx/ISNet-master/ISNet-master/model/gaussianimage/xunlian/'+'4.png',dst1)
             dst.append(dst1)
             i0 = i0 + 1
         dst11 = np.array(dst).reshape(length0, h // 2, w // 2, 3)
@@ -228,14 +216,12 @@ class ABCNet(nn.Module):
         e4 = self.maxpools[2](e3)
         e4 = self.Convtans4(e4)
 
-        # --------------- add by mjw---------------
-        # 第三层高斯金字塔，循环处理每个样本
+        # ------------------------------
         _, _, hei3, wid3 = e4.shape
         dst_1 = []
         for i1 in range(length0):
             x_gra_1 = dst11[i1, :, :, :]
             dst2 = cv.pyrDown(x_gra_1)
-            # cv.imwrite('/home/b311/yzx/ISNet-master/ISNet-master/model/gaussianimage/xunlian/'+'6.png',dst2)
             dst_1.append(dst2)
             i0 = i0 + 1
 
@@ -260,21 +246,21 @@ class ABCNet(nn.Module):
         # d5 = torch.cat((e4, d5), dim=1)
         # d5 = self.dirConv1(d5)
         # d5 = self.SWSAM_1(d5)
-        d5 = self.KTM1(e4, d5)
+        d5 = self.DFOM1(e4, d5)
         d5 = self.Up_conv5(d5)
 
         d4 = self.Up4(d5)
         # d4 = torch.cat((e3, d4), dim=1)
         # d4 = self.dirConv2(d4)
         # d4 = self.SWSAM_2(d4)
-        d4 = self.KTM2(e3, d4)
+        d4 = self.DFOM2(e3, d4)
         d4 = self.Up_conv4(d4)
 
         d3 = self.Up3(d4)
         # d3 = torch.cat((e2, d3), dim=1)
         # d3 = self.dirConv3(d3)
         # d3 = self.SWSAM_3(d3)
-        d3 = self.KTM3(e2, d3)
+        d3 = self.DFOM3(e2, d3)
         d3 = self.Up_conv3(d3)
 
         d2 = self.Up2(d3)
@@ -303,6 +289,6 @@ class ABCNet(nn.Module):
 
 if __name__ == '__main__':
     x = torch.randn(8, 3, 256, 256)
-    model = ABCNet(ori_h=256)
+    model = DRTENet(ori_h=256)
     print(model(x))
 
